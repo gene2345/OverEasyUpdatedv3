@@ -1,0 +1,77 @@
+{%extends "base.html" %}
+
+{% block title %} Your Porfolio {% endblock %}
+
+{% block content %}
+<h1 align = "center">Your Portfolio</h1>
+<div class = 'homediv1'>
+    <div class = 'inline'>
+        <h6 class = 'lol' style = "color: blue; display: inline-block; margin-right: 150px; margin-left: 20px">Equity</h6>
+        <h6 class = 'lol' style = "color: blue; display: inline-block; margin-right: 170px;">Current Price </h6>
+        <h6 class = 'lol' style = "color: blue; display: inline-block; margin-right: 170px;">Quantity | Price </h6>
+        <h6 class = 'lol' style = "color: blue; display: inline-block;">Floating P&L</h6>
+    </div>
+</div>
+<ul class = "list-group list-group-flush" id = "notes">
+    {% for note in user.portfolio%} <!-- user is related to notes via foreign key database -->
+    <li class = "list-group-item" >
+        <div class = "homediv1" style = "display:flex; height:10px"> 
+        <div style = 'width:200px'> {{note.data}}  </div>
+        <div style = 'font-size: 20px; font-weight: bold; width:300px'> {{note.current_price}} </div>
+        <div class = 'exactStockDetails' style = 'width:255px'>
+        <div style = 'font-weight: bold; font-size: 22px;'> {{note.bought_qty}}</div>
+        <div style = 'font-size: 15px;'> {{note.bought_price}} USD </div>         
+        </div>
+        {%if note.profitloss > 0 %}
+        <div style = 'font-size: 20px; font-weight: bold; color: green;'> {{note.profitloss}} </div>
+        {% else %}
+        <div style = 'font-size: 20px; font-weight: bold; color: red;'> {{note.profitloss}} </div>
+        {% endif %}
+        </div>
+        <a type = "button" class = "btn btn-danger yrportbutt" href = '/deleteyrport/{{ note.id }}'>
+            Delete
+        </a>
+        <button type="button" class="btn btn-primary yrportbutt" data-toggle="modal" data-target="#exampleModal" style = 'display: flex;'>
+            Sell
+        </button>
+    </li>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Close Position</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form method = 'POST', action = '/editPosition'> 
+                <textarea name = "stock" id = "stock" class = "form-control" style = "width:30%; display:inline-block;" placeholder="Enter equity here">{{ note.data }}</textarea>
+                <textarea name = "sell_price" id = "bought_price" class = "form-control" style = "width:30%; display:inline-block;" placeholder="Sell Price"></textarea>
+                <textarea name = "sell_qty" id = "bought_qty" class = "form-control" style = "width:30%; display:inline-block;" placeholder="Sell Quantity"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button> 
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+    {% endfor %}
+</ul>
+<br/>
+<form method = 'POST', action = '/yrport'> <!-- sends it to the home page as a POST method-->
+    <textarea name = "stock" id = "stock" class = "form-control" style = "width:33%; display:inline-block;" placeholder="Enter equity here"></textarea>
+    <textarea name = "bought_price" id = "bought_price" class = "form-control" style = "width:33%; display:inline-block;" placeholder="Purchase Price"></textarea>
+    <textarea name = "bought_qty" id = "bought_qty" class = "form-control" style = "width:33%; display:inline-block;" placeholder="Purchase Quantity"></textarea>
+</br>
+    <div align = "center">
+        <button type = "submit" class = "btn btn-primary">Add Stock</button>
+    </div>
+</form>
+
+
+{% endblock %}

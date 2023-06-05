@@ -1,0 +1,17 @@
+{%extends "base.html" %} <!--STOCK INFORMATION HTML-->
+
+{% block title %} Home Page {% endblock %}
+
+{% block content %}
+
+<h1 align = 'center' style = 'color:pink' > View your trading history here </h1>
+
+<form method = 'POST'> <!-- sends it to the home page as a POST method-->
+    <textarea name = "stock" id = "note" class = "form-control"></textarea>
+</br>
+    <div align = "center">
+        <button type = "submit" class = "btn btn-primary">View Stock Info</button>
+    </div>
+</form> 
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{%extends "base.html" %}
+
+{% block title %} Home Page {% endblock %}
+
+{% block content %}
+<br/>
+<h4 align = "center">Stock Information</h4>
+{% if stock_info %}
+<h1 align = "margin-left", style = 'color:blue'>{{stock_info[0]}}</h1>
+<div class = 'homediv1'>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Price</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[1] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Outstanding Shares</div>
+        <h6 class = 'tracker_body' > {{ stock_info[2] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Market Cap</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[3] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Total Debt</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[4] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Total Cash</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[5] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Diluted Earnings Per Share</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[6] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Enterprise Value (EV)</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[7] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Revenue</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[8] }}</h6>
+    </div>
+    {% if stock_info[9] > 0 %}
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Quartely Revenue Growth</div>
+        <h6 class = 'tracker_body' style = 'color:rgb(164, 222, 77)'> USD {{ stock_info[9] }}</h6>
+    </div>
+    {% else %}
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Quartely Revenue Growth</div>
+        <h6 class = 'tracker_body' style = 'color:red'> USD {{ stock_info[9] }}</h6>
+    </div>
+    {% endif %}
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >EBITDA</div>
+        <h6 class = 'tracker_body' > USD {{ stock_info[10] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >EBITDA Margin</div>
+        <h6 class = 'tracker_body' > {{ stock_info[11] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >EV / revenue</div>
+        <h6 class = 'tracker_body' > {{ stock_info[12] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >EV / EBITDA</div>
+        <h6 class = 'tracker_body' > {{ stock_info[13] }}</h6>
+    </div>
+    <div class = 'tracker_paragraph'>
+        <div class = 'tracker_head' >Price to Earnings Ratio</div>
+        <h6 class = 'tracker_body' > {{ stock_info[14] }}</h6>
+    </div>
+    
+</div>
+{% endif %}
+<form method = 'POST'> <!-- sends it to the home page as a POST method-->
+    <textarea name = "stock" id = "note" class = "form-control"></textarea>
+</br>
+    <div align = "center">
+        <button type = "submit" class = "btn btn-primary">View Stock Info</button>
+    </div>
+</form>
+
+{% endblock %}
