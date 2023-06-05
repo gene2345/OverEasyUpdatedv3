@@ -6,12 +6,62 @@
 
 <h1 align = 'center' style = 'color:pink' > View your trading history here </h1>
 
-<form method = 'POST'> <!-- sends it to the home page as a POST method-->
-    <textarea name = "stock" id = "note" class = "form-control"></textarea>
-</br>
-    <div align = "center">
-        <button type = "submit" class = "btn btn-primary">View Stock Info</button>
-    </div>
-</form> 
+<ul class = "list-group list-group-flush" id = "historyList">
+    {% for data in user.portfolioHistory%} <!-- user is related to notes via foreign key database -->
+    <li class = "list-group-item" >
+        <div>
+        <div class = "tradingHistoryblock1">Status</div>
+        <div class = "tradingHistoryblock2">
+            {% if data.status == "BUY" %}
+                <div style = "color: green;""> BUY </div>
+            {% else %}
+                <div style = "color:red"> SELL </div>
+            {% endif %} 
+        </div>
+        <div class = "tradingHistoryblock3">
+            <a type = "button" class = "close" style = "align-content: center;" href = '/deletePortfolioHistory/{{ data.id }}'>
+                <span aira-hidden="true"> &times; </span>
+            </a>
+        </div>
+        <div>
+            <div class = "tradingHistoryblock1" >Stock Name</div>
+            <div class = "tradingHistoryblock2"> {{data.stock}}  </div>
+        </div>
+        <div>
+            <div class = "tradingHistoryblock1">Bought Price</div>
+            {% if data.bought_price == None %}
+                <div class = "tradingHistoryblock2"> N/A </div>
+            {% else %}
+                <div class = "tradingHistoryblock2"> {{data.bought_price}}</div>
+            {% endif %}
+        </div>
+        <div>
+            <div class = "tradingHistoryblock1">Sold Price</div>
+            {% if data.sold_price == None %}
+                <div class = "tradingHistoryblock2"> N/A </div>
+            {% else %}
+                <div class = "tradingHistoryblock2"> {{data.sold_price}}</div>
+            {% endif %}
+        </div>
+        <div>
+            <div class = "tradingHistoryblock1">Quantity Exchanged</div>
+            <div class = "tradingHistoryblock2"> {{data.qty_exchanged}} </div>
+        </div>
+        <div>
+            <div class = "tradingHistoryblock1">Realized Profit / Loss </div>
+            {% if data.profitloss == None %}
+                <div class = "tradingHistoryblock2"> N/A </div>
+            {% elif data.profitloss >= 0 %}
+                <div class = "tradingHistoryblock2" style = "color: rgb(136, 202, 37);"> +{{data.profitloss}}</div>
+            {% else %}
+                <div class = "tradingHistoryblock2" style = "color: red"> {{data.profitloss}} </div>
+            {% endif %}
+        </div>
+                </div>
+    </li>
+    {% endfor %}
+</ul>
+
+
 
 {% endblock %}

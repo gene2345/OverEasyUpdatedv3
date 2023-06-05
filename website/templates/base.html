@@ -48,6 +48,19 @@
       font-size: 13px;
     }
 
+    .tradingHistoryblock1 {
+      display: inline-block;
+      overflow: hidden;
+      width: 185px;
+    }
+
+    .tradingHistoryblock2 {
+      display: inline-block;
+      overflow: hidden;
+      font-size:22px;
+      width:675px;
+    }
+
     </style>
     <title>{% block title%} Home title {% endblock%}</title>
 </head>
@@ -65,7 +78,7 @@
           <a class = "nav-item nav-link" id = "SA" href = "/SA">Sentiment Analysis</a>
           <a class = "nav-item nav-link" id = "yrport" href = "/yrport">Your Portfolio</a>
           <a class = "nav-item nav-link" id = "stockfinder" href = "/stockFinder">Stock Finder</a>
-          <a class = "nav-item nav-link" id = "stockfinder" href = "/history">Temp history button</a>
+          <a class = "nav-item nav-link" id = "stockfinder" href = "/history">Trade History</a>
           <a class = "nav-item nav-link" id = "logout" href = "/logout">Logout</a>
           {% else %}
           <h2 style = "color:white"> OverEasy </h2>

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import User, Note, Portfolio
+from .models import User, Note, Portfolio, PortfolioHistory
 from . import db
 from .calc import numericChecker
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
@@ -30,7 +30,7 @@ def home():
 
 
 @login_required
-@views.route('/delete/<int:id>') #deleting an extra stock
+@views.route('/delete/<int:id>') #deleting an extra stock from homepage
 def delete(id):
     note = Note.query.get(id)
     if note:
@@ -44,7 +44,7 @@ def delete(id):
 def CCA():
     return render_template("CCA.html", user = current_user)
 
-@login_required
+@login_required #add to position in portfolio page
 @views.route('/yrport', methods = ['GET', 'POST'])
 def yrport():   
     if request.method == 'POST':
@@ -58,10 +58,9 @@ def yrport():
         elif numericChecker(bought_qty):
             flash("Please re enter quantity", category="error")
             return render_template("yrport.html", user = current_user)
-        price = yf.Ticker(stock1).info['regularMarketPreviousClose']
-        exist_in_db = False
-        item = Portfolio.query.filter_by(data = stock1).first()
         try:
+            price = yf.Ticker(stock1).info['regularMarketPreviousClose']
+            item = Portfolio.query.filter_by(data = stock1).first()
             if item is not None: #Add to history page
                 old_bought_price = float(item.bought_price)
                 old_bought_qty = float(item.bought_qty)
@@ -72,11 +71,18 @@ def yrport():
                 item.bought_qty = new_bought_qty
                 item.bought_price = new_bought_price
                 item.profitloss = new_profitloss
+                new_history = PortfolioHistory(user_id = current_user.id, status = "BUY", qty_exchanged = bought_qty, 
+                                               bought_price = bought_price, sold_price = None, profitloss = None, stock = stock1)
+                db.session.add(new_history)
+                db.session.commit()
                 flash("Detected existing stock, added to position", category = "success")
             else: #Add to history page
                 profitloss = round((float(bought_price) - float(price))*float(bought_qty),2)
                 new_stock = Portfolio(data=stock1, user_id = current_user.id, bought_price = bought_price, 
                                         bought_qty = bought_qty, current_price = price, profitloss = profitloss)
+                new_history = PortfolioHistory(user_id = current_user.id, status = "BUY", qty_exchanged = bought_qty, 
+                                               bought_price = bought_price, sold_price = None, profitloss = None, stock = stock1)
+                db.session.add(new_history)
                 db.session.add(new_stock)
                 db.session.commit()
                 flash("Added", category = "success")
@@ -91,7 +97,7 @@ def yrport():
     return render_template("yrport.html", user = current_user)
 
 @login_required
-@views.route('/deleteyrport/<int:id>') #deleting an extra stock
+@views.route('/deleteyrport/<int:id>') #deleting an extra stock from your portfolio page
 def deleteyrport(id):
     portfolio = Portfolio.query.get(id)
     if portfolio:
@@ -101,7 +107,7 @@ def deleteyrport(id):
     return redirect('/yrport')
 
 @login_required
-@views.route('/stockFinder', methods = ['GET', 'POST']) #more info on a specific stock
+@views.route('/stockFinder', methods = ['GET', 'POST']) #more info on a specific stock, stockfinder page
 def stockFinder():
     if request.method == 'POST':
         stock1 = request.form.get('stock').upper()
@@ -114,7 +120,7 @@ def stockFinder():
     return render_template('stockFinder.html', user = current_user, stock_info = [])
 
 @login_required
-@views.route('/moreInfo/<id>') #deleting an extra stock
+@views.route('/moreInfo/<id>') #brings you to moreInfo page
 def moreInfo(id):
     info_list = get_all_data(id)
     return render_template('moreInfo.html', user = current_user, stock_info = info_list)
@@ -124,7 +130,7 @@ def moreInfo(id):
 def SA():
     return render_template("SA.html", user = current_user)
 
-@login_required
+@login_required #selling a position in your portfolio
 @views.route('/editPosition', methods = ['GET', 'POST'])
 def editPosition():
     if request.method == 'POST':
@@ -142,16 +148,29 @@ def editPosition():
         if float(sell_qty) > item.bought_qty:
             flash("You cannot sell more than you own", category = "error")
             return render_template("yrport.html", user = current_user)
-        if float(sell_qty) == item.bought_qty: #Add to history page
+        if float(sell_qty) == item.bought_qty:
+            sell_qty = float(sell_qty)
+            sell_price = float(sell_price)
+            profitloss = (sell_price - item.bought_price) * sell_qty
+            new_history = PortfolioHistory(user_id = current_user.id, status = "SELL", qty_exchanged = sell_qty, 
+                                            bought_price = None, sold_price = sell_price, profitloss = profitloss, stock = stock1)
+            db.session.add(new_history)
+            db.session.commit()
             db.session.delete(item)
             db.session.commit()
+            flash("Successfully updated portfolio", category = "success")
             return redirect('/yrport')
-        sell_qty = float(sell_qty) #Add to history page
+        sell_qty = float(sell_qty)
+        sell_price = float(sell_price)
         old_bought_qty = item.bought_qty
         new_bought_qty = old_bought_qty - sell_qty
         item.bought_qty = new_bought_qty
+        profitloss = (sell_price - item.bought_price) * sell_qty
+        new_history = PortfolioHistory(user_id = current_user.id, status = "SELL", qty_exchanged = sell_qty, 
+                                            bought_price = None, sold_price = sell_price, profitloss = profitloss, stock = stock1)
+        db.session.add(new_history)
         db.session.commit()
-        flash("Successfully updated portfolio")
+        flash("Successfully updated portfolio", category = "success")
     return redirect('/yrport')
 
 @login_required
@@ -159,3 +178,12 @@ def editPosition():
 def tester():
     return render_template("history.html", user = current_user)
 
+@login_required
+@views.route('/deletePortfolioHistory/<int:id>') #deleting an extra stock from your portfolio page
+def deletePortfolioHistory(id):
+    portfolioHistory = PortfolioHistory.query.get(id)
+    if portfolioHistory:
+        db.session.delete(portfolioHistory)
+        db.session.commit()
+        flash("Deleted", category = "success")
+    return redirect('/history')

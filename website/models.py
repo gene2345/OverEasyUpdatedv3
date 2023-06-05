@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note') #use uppercase when rs but lowercase for foreign key
     portfolio = db.relationship('Portfolio')
+    portfolioHistory = db.relationship('PortfolioHistory')
 
 class Portfolio(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,13 +26,14 @@ class Portfolio(db.Model):
     current_price = db.Column(db.Float)
     profitloss = db.Column(db.Float) #floating profit loss
 
-
 class PortfolioHistory(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    stock = db.Column(db.String(20))
     status = db.Column(db.String(10))
     qty_exchanged = db.Column(db.Float)
-    price_exchanged = db.Column(db.Float)
-    profitloss = db.Column(db.String(100))
+    bought_price = db.Column(db.Float)
+    sold_price = db.Column(db.Float)
+    profitloss = db.Column(db.Float)
 
 
