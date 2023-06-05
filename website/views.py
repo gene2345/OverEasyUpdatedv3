@@ -108,6 +108,7 @@ def deleteyrport(id):
 
 @login_required
 @views.route('/stockFinder', methods = ['GET', 'POST']) #more info on a specific stock, stockfinder page
+#stockfinder is essentially useless, it is about the same as more info page, can delete if no other use after milestone 1
 def stockFinder():
     if request.method == 'POST':
         stock1 = request.form.get('stock').upper()
