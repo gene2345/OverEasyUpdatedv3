@@ -159,7 +159,3 @@ def editPosition():
 def tester():
     return render_template("history.html", user = current_user)
 
-@login_required
-@views.route('/hisstory')
-def testesr():
-    return render_template("history.html", user = current_user)
