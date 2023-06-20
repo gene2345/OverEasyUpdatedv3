@@ -1,0 +1,46 @@
+{%extends "base.html" %}
+
+{% block title %} Sentimental Analysis {% endblock %}
+
+{% block content %}
+<h1>Sentiment Analysis</h1>
+
+<h2>{{ticker}}</h2>
+
+<h3>{{labels}}</h3>
+
+<h3>{{values}}</h3>
+
+
+<div>
+    <canvas id="myChart" width = "400" height = "300"></canvas>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    const ctx = document.getElementById('myChart');
+  
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Positive', 'Neutral', 'Negative'],
+        datasets: [{
+          label: 'Sentiment for Ticker',
+          data: {{ values }},
+          borderWidth: 1,
+          backgroundColor: ['green', 'blue', 'red']
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+   
+
+{% endblock %}

@@ -3,7 +3,14 @@
 {% block title %} Sentimental Analysis {% endblock %}
 
 {% block content %}
+<h1>Sentiment Analysis</h1>
 
-<h1> To be added </h1>
+<form method = 'POST'> <!-- sends it to the home page as a POST method-->
+    <textarea name = "ticker" id = "ticker" class = "form-control"></textarea>
+</br>
+    <div align = "center">
+        <button type = "submit" class = "btn btn-primary">View Stock Info</button>
+    </div>
+</form>
 
 {% endblock %}

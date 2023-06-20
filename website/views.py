@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from .models import User, Note, Portfolio, PortfolioHistory
 from . import db
 from .calc import numericChecker
+from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
 import json
 import yfinance as yf
@@ -127,9 +128,17 @@ def moreInfo(id):
     return render_template('moreInfo.html', user = current_user, stock_info = info_list)
 
 @login_required
-@views.route('/SA')
+@views.route('/SA', methods = ['GET', 'POST'])
 def SA():
-    return render_template("SA.html", user = current_user)
+    if request.method == 'POST':
+        ticker = request.form.get('ticker').upper()
+        raw_data = finviz_scraper(ticker)
+        sentiments = sentiment_calculator(raw_data)
+        values = [sentiments["Positive"][0], sentiments["Neutral"][0], sentiments["Negative"][0]]
+        labels = ["Positive", "Neutral", "Negative"]
+        return render_template("SAresults.html", user = current_user, ticker = ticker, values = values, labels = labels)
+    else:
+        return render_template("SA.html", user = current_user)
 
 @login_required #selling a position in your portfolio
 @views.route('/editPosition', methods = ['GET', 'POST'])
