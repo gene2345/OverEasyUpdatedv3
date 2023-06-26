@@ -71,6 +71,36 @@ def sentiment_calculator(lister): #input a list of texts and returns dictionary
 
     return d
 
+def sentiment_calculator_yahoo(lister):
+    positive = 0.0
+    negative = 0.0
+    neutral = 0.0
+
+    length = len(lister["conversation"]['comments'])
+    for i in range(length):
+        if i == 0:
+            continue
+        try:
+            text = lister["conversation"]['comments'][i]['content'][0]['text']
+            positive += get_pos(text)
+            negative += get_neg(text)
+            neutral += get_neut(text)
+        except KeyError:
+            continue
+      
+    positive = positive / length
+    negative = negative / length
+    neutral = neutral / length
+
+    d = {
+    "Positive" : [positive,],
+    "Neutral" : [neutral,],
+    "Negative" : [negative,]
+    }
+
+    return d
+
+
 def finviz_scraper(ticker):
     finviz_url = 'http://finviz.com/quote.ashx?t='
 
@@ -145,5 +175,31 @@ def get_fear_and_greed():
 
     return classer.text
 
+def get_market_trend(lister):
+    if lister[0] > lister[2]:
+        return "Bullish"
+    elif lister[0] == lister[2]:
+        return "Neutral"
+    else:
+        return "Bearish"
 
-
+def get_market_condition(lister):
+    if lister[0] > lister[2]:
+        return "Positive"
+    elif lister[0] == lister[2]:
+        return "Neutral"
+    else:
+        return "Negative"
+    
+def prelim_model_calc(list_of_sentiments):
+    pos_count = 0
+    neg_count = 0
+    for listers in list_of_sentiments:
+        pos_count += listers[0]
+        neg_count += listers[1]
+    if pos_count > neg_count:
+        return "Bullish"
+    elif neg_count > pos_count:
+        return "Bearish"
+    else:
+        return "Neutral"

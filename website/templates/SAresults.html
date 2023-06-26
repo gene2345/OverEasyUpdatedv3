@@ -3,19 +3,50 @@
 {% block title %} Sentimental Analysis {% endblock %}
 
 {% block content %}
-<h1>Sentiment Analysis</h1>
+</br>
+<div align = "center">
+<h1 style = 'color:pink'>{{ticker}}</h1>
+</br>
+</div>
 
-<h2>{{ticker}}</h2>
-
-<h3>{{labels}}</h3>
-
-<h3>{{values}}</h3>
-
+<div class="SA-results-first-box" style = "border-top-width: 100px;">
+  <h4 style = "height: 25px; text-align: center; border-top-width: 15px;">Overall Sentiment: </h4>
+  {% if overall_sentiment == "Bullish" %}
+  <h1 align = 'center' style = 'color:greenyellow'>{{overall_sentiment}}</h1>
+  {% elif overall_sentiment == "Bearish" %}
+  <h1 align = 'center' style = 'color:red'>{{overall_sentiment}}</h1>
+  {% else %}
+  <h1 align = 'center' style = 'color:blue'>{{overall_sentiment}}</h1>
+  {% endif %}
+</div>
+</br>
 
 <div>
-    <canvas id="myChart" width = "400" height = "300"></canvas>
-  </div>
-  
+  <h3 style = "text-decoration: underline;">Further in depth analysis - FinViz</h3>
+</div>
+</br>
+<div>
+  <canvas id="myChart" width = "375" height = "200"></canvas>
+</div>
+</br>
+<div>
+  <p1 class ="analysis_para">From our latest analysis on Finviz articles, there is an overall {{finviz_sentiment}} 
+    sentiment towards the {{ticker}} stock, which indicates a {{finviz_trend}} trend for this $ticker </p1>
+</div>
+</br>
+</br>
+<div>
+  <h3 style = "text-decoration: underline;">Further in depth analysis - Yahoo</h3>
+</div>
+</br>
+<div>
+  <canvas id="myChart2" width = "375" height = "200"></canvas>
+</div>
+</br>
+<p1 class = "analysis_para">From our latest analysis on Yahoo posts and comments, there is an overall {{yahoo_sentiment}} 
+  sentiment towards the {{ticker}} stock, which indicates a {{yahoo_trend}} trend for this $ticker </p1>
+
+{% block javascript %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <script>
@@ -26,8 +57,8 @@
       data: {
         labels: ['Positive', 'Neutral', 'Negative'],
         datasets: [{
-          label: 'Sentiment for Ticker',
-          data: {{ values }},
+          label: 'FINVIZ Sentiment for Ticker',
+          data: {{finviz_values}},
           borderWidth: 1,
           backgroundColor: ['green', 'blue', 'red']
         }]
@@ -41,6 +72,32 @@
       }
     });
   </script>
-   
+
+<script>
+  const ctl = document.getElementById('myChart2');
+
+  new Chart(ctl, {
+    type: 'bar',
+    data: {
+      labels: ['Positive', 'Neutral', 'Negative'],
+      datasets: [{
+        label: 'YAHOO Sentiment for Ticker',
+        data: {{yahoo_values}},
+        borderWidth: 1,
+        backgroundColor: ['green', 'blue', 'red']
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+
+{% endblock %}
 
 {% endblock %}

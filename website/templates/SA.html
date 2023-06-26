@@ -3,13 +3,24 @@
 {% block title %} Sentimental Analysis {% endblock %}
 
 {% block content %}
-<h1>Sentiment Analysis</h1>
+
+</br>
+<h1 align = "center">Sentiment Analysis</h1>
+
+</br>
+
+<h1 class="area-under-SA" align = "center"> Our Sentiment Analysis scraps different websites, such as FinViz and Yahoo for posts and comments that are
+    related to the ticker inputed. We then use Natural Language Processing, the KernAI model from Huggingface, to
+    analyse whether the posts indicated were bullish or bearish. </h1>
+
+</br>
+</br>
 
 <form method = 'POST'> <!-- sends it to the home page as a POST method-->
-    <textarea name = "ticker" id = "ticker" class = "form-control"></textarea>
+    <textarea name = "ticker" id = "ticker" class = "form-control" placeholder="Enter ticker here"></textarea>
 </br>
     <div align = "center">
-        <button type = "submit" class = "btn btn-primary">View Stock Info</button>
+        <button type = "submit" class = "btn btn-primary">View Sentiments</button>
     </div>
 </form>
 

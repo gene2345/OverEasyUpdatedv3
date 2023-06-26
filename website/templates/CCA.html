@@ -1,9 +1,26 @@
-{%extends "base.html" %}
+<!-- template inheritance -->
+{% extends 'base.html' %}
 
-{% block title %} Login {% endblock %}
+{% block title %}
+<h1>CCA Analysis</h1>
+{% endblock %}
 
 {% block content %}
-
-<h1>To be added</h1>
-
+<form action ="/CCA" method = "post" align = "center">
+    <!-- <p>Please enter the ticker symbol of choice:</p> -->
+    <label align = "center">
+    </br>
+        <h1 style = "color: purple;"> Comparable Company Analysis </h1>
+</br>
+        <h1 class = "area-under-SA"> By scraping and comparing detailed values of the company, we hope to provide you a better understanding of 
+            how this firm is performing against peers in an similar industry.
+        </h1>
+    </br>
+        <input class = 'form-control' type="text" name = "TickerSymbol" placeholder = "Enter ticker here" align = "center">  
+    </label>
+</br>
+</br>
+    <button type = "submit" class = "btn btn-primary" align = "center">Submit</button>
+</form>
 {% endblock %}
+

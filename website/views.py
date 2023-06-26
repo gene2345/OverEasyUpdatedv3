@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import User, Note, Portfolio, PortfolioHistory
+from .models import Note, Portfolio, PortfolioHistory
 from . import db
 from .calc import numericChecker
-from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper
+from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper, sentiment_calculator_yahoo, get_market_condition, get_market_trend, prelim_model_calc
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
-import json
 import yfinance as yf
+from .resultsCCA import *
 
 views = Blueprint("views", __name__)
 
@@ -41,9 +41,19 @@ def delete(id):
     return redirect('/')
 
 @login_required
-@views.route('/CCA')
-def CCA():
-    return render_template("CCA.html", user = current_user)
+@views.route('/CCA', methods = ['GET', 'POST'])
+def cca():
+    if request.method == 'POST':
+        #try:
+        task_content = request.form['TickerSymbol']
+        df_required, bool1, bool2, bool3 = results(task_content)
+        return render_template("CCAresults.html", table = df_required.to_html(), text = task_content, 
+                                   bool1 = bool1, bool2 = bool2, bool3 = bool3, user = current_user)
+        #except:
+            #flash("Please key in a valid stock ticker", category = "error")
+            #return render_template("CCA.html", user = current_user)        
+    else:
+        return render_template("CCA.html", user = current_user)
 
 @login_required #add to position in portfolio page
 @views.route('/yrport', methods = ['GET', 'POST'])
@@ -131,12 +141,27 @@ def moreInfo(id):
 @views.route('/SA', methods = ['GET', 'POST'])
 def SA():
     if request.method == 'POST':
-        ticker = request.form.get('ticker').upper()
-        raw_data = finviz_scraper(ticker)
-        sentiments = sentiment_calculator(raw_data)
-        values = [sentiments["Positive"][0], sentiments["Neutral"][0], sentiments["Negative"][0]]
-        labels = ["Positive", "Neutral", "Negative"]
-        return render_template("SAresults.html", user = current_user, ticker = ticker, values = values, labels = labels)
+        try:
+            ticker = request.form.get('ticker').upper()
+            raw_data = yahoo_scraper(ticker)
+            yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
+            yahoo_values = [yahoo_sentiments["Positive"][0], yahoo_sentiments["Neutral"][0], yahoo_sentiments["Negative"][0]]
+            raw_data_2 = finviz_scraper(ticker)
+            finviz_sentiments = sentiment_calculator(raw_data_2)
+            finviz_values = [finviz_sentiments["Positive"][0], finviz_sentiments["Neutral"][0], finviz_sentiments["Negative"][0]]
+            labels = ["Positive", "Neutral", "Negative"]
+            yahoo_trend = get_market_trend(yahoo_values)
+            yahoo_sentiment = get_market_condition(yahoo_values)
+            finviz_trend = get_market_trend(finviz_values)
+            finviz_sentiment = get_market_condition(finviz_values)
+            overall_sentiment = prelim_model_calc([finviz_values, yahoo_values])
+            return render_template("SAresults.html", user = current_user, ticker = ticker, yahoo_values = yahoo_values, 
+                               labels = labels, finviz_values = finviz_values, yahoo_trend = yahoo_trend,
+                               yahoo_sentiment = yahoo_sentiment, finviz_trend = finviz_trend, finviz_sentiment = finviz_sentiment
+                               , overall_sentiment = overall_sentiment)
+        except:
+            flash('Stock does not exist', category = "error")
+            return render_template("SA.html", user = current_user)
     else:
         return render_template("SA.html", user = current_user)
 

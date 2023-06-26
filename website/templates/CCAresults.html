@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <h1>CCA Results</h1>
+    <h2>Table of intrinsic value analysis</h2>
+{% endblock %}
+
+{% block content %} 
+    {{ table | safe }}
+{% endblock %};
+
+<!-- Include true false diagram -->
+{% block extra %}
+    <main class="main-container">
+        <div class = "main-title">
+            <link rel = "stylesheet" href="static\css\lol.css">
+            <p class="font-weight-bold"><b>VALUATION</b></p>
+        </div>
+    </br>
+        <div class = "container">
+            <div class = "row">
+                <div class = "w3-card-4">
+                    <div class = "w3-container w3-center">
+                        <p class = "text-primary">EBIDTA MARGINS</p>
+                    </div>
+                    {% if bool1 %}
+                    <img src = "static\lol\check-mark.png" alt = "UNDERVALUED">
+                    {% else %}
+                    <img src = "static\lol\delete-button.png" alt = "OVERVALUED">
+                    {% endif %}
+                </div>
+
+                <div class = "w3-card-4">
+                    <div class = "w3-container w3-center">
+                        <p class = "text-primary">EV/REVENUE</p>
+                    </div>
+                    {% if bool2 %}
+                    <img src = "static\lol\check-mark.png" alt = "UNDERVALUED">
+                    {% else %}
+                    <img src = "static\lol\delete-button.png" alt = "OVERVALUED">
+                    {% endif %}
+                </div>
+
+                <div class = "w3-card-4">
+                    <div class = "w3-container w3-center">
+                        <p class = "text-primary">EV/EBITDA</p>
+                    </div>
+                    {% if bool3 %}
+                    <img src = "static\lol\check-mark.png" alt = "UNDERVALUED">
+                    {% else %}
+                    <img src = "static\lol\delete-button.png" alt = "OVERVALUED">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class = "w3-card-4">
+            <div class = "w3-container w3-center">
+                <p class = "text-primary">EV/REVENUE</p>
+            </div>
+            {% if bool2 %}
+            <img src = "static\lol\check-mark.png" alt = "UNDERVALUED">
+            {% else %}
+            <img src = "static\lol\delete-button.png" alt = "OVERVALUED">
+            {% endif %}
+        </div>
+
+        <div class = "w3-card-4">
+            <div class = "w3-container w3-center">
+                <p class = "text-primary">EV/EBITDA</p>
+            </div>
+            {% if bool3 %}
+            <img src = "static\lol\check-mark.png" alt = "UNDERVALUED">
+            {% else %}
+            <img src = "static\lol\delete-button.png" alt = "OVERVALUED">
+            {% endif %}
+        </div> -->
+
+{% endblock %}

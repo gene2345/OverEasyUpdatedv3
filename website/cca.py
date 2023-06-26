@@ -3,12 +3,10 @@ from yahooquery import Ticker
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import time
-import traceback
 
 #All relevant methods for API calls
 
-#Checking its existence 
+#Checking its existence (see whether can try to beautify)
 def check_existence(stock):
     skip = True
     output = Ticker(stock).price[stock]
@@ -25,6 +23,9 @@ def get_price_marketCap(stock):
     marketCap = ticker['marketCap']
     return price, marketCap
 
+#Testing get_price_marketCap
+#print(get_price_marketCap('aapl'))
+
 def get_outstandingShares_enterpriseValue_peg(stock):
     tick = Ticker(stock)
     ticker = tick.key_stats[stock]
@@ -39,6 +40,9 @@ def get_outstandingShares_enterpriseValue_peg(stock):
         peg = None
         
     return shares_outstanding, enterprise_val, peg
+
+#Testing get_outstandingShares_enterpriseValue_peg
+#print(get_outstandingShares_enterpriseValue_peg('aapl'))
 
 def get_totalDebt_totalCash_EBITDA(stock):
     tick = Ticker(stock)
@@ -60,6 +64,9 @@ def get_totalDebt_totalCash_EBITDA(stock):
         
     return debt, cash, ebitda
 
+#Testing get_totalDebt_totalCash_EBITDA
+#print(get_totalDebt_totalCash_EBITDA('aapl'))
+
 def get_dilutedEps_revenue(stock):
     tick = Ticker(stock)
     data = tick.all_financial_data()
@@ -67,6 +74,9 @@ def get_dilutedEps_revenue(stock):
     diluted_eps = data.iloc[index_last]['DilutedEPS']
     revenue = data.iloc[index_last]['TotalRevenue']
     return diluted_eps, revenue
+
+#Testing get_dilutedEps_revenue
+#print(get_dilutedEps_revenue('aapl'))
 
 def get_quarterlyRevenueGrowth(stock):
     tick = Ticker(stock)
@@ -83,6 +93,7 @@ def get_quarterlyRevenueGrowth(stock):
     else:
         quarterly_revenue_growth = 'No Data'
     return quarterly_revenue_growth
+
 
 def express_in_MM(number):
     return number/1_000_000
@@ -134,10 +145,49 @@ def get_all_data(stock):
                    ebitda_margin, ev_revenue, ev_ebitda, peg]
     return ordered_list
 
+#print(get_quarterlyRevenueGrowth('aapl'))
 
-# For Python 3.0 and later
+#Identifying correct peer universe
+import yfinance as yf 
+from yahooquery import Screener
+
+def not_correct_industry(stock, industry):
+    return not yf.Ticker(stock).info['industry'] == industry
+
+#Peer Universe provided by YahooQuery's recommendation function
+def og_peer_universe(stock, industry):
+    p_universe = []
+    tickers = Ticker(stock).recommendations[stock]['recommendedSymbols']
+    
+    for dic in tickers:
+        if not_correct_industry(dic['symbol'], industry):
+            continue
+        p_universe.append(dic['symbol'])
+    
+    return p_universe
+
+#Recommendations provided by YahooQuery is applicable in the CCA valuations
+def lucky_peer_universe(lst, industry):
+    if lst == []:
+        return []
+    elif og_peer_universe(lst[0], industry) == []:
+        print(type(lst))
+        return [lst[0], ] + lucky_peer_universe(lst[1:], industry)
+    else:
+        tickers = og_peer_universe(lst[0], industry)
+        return tickers + lucky_peer_universe(lst[1:], industry)
+
+#Recommendations in the event YahooQuery's Recommendations function is not comprehensive enough
+def peer_universe_(stock, industry):
+    lst = og_peer_universe(stock, industry)
+    if lucky_peer_universe(lst, industry) != []:
+        #explore parameters to include here >> but just gonna go with the top 5
+        return list(set(lucky_peer_universe(lst, industry)))[:5]
+    else:
+        return scrape_peer_universe(stock.upper())
+    
+#Scrape as last resort
 from urllib.request import urlopen
-
 import certifi
 import json
 import urllib.request
@@ -183,27 +233,6 @@ def scrape_peer_universe(stock):
     peer_universe = list(map(lambda x: x['symbol'], industry_sorted))
     return peer_universe
 
-
-#Identifying correct peer universe
-import yfinance as yf 
-from yahooquery import Screener
-
-def not_correct_industry(stock, industry):
-    return not yf.Ticker(stock).info['industry'] == industry
-
-#Peer Universe provided by YahooQuery's recommendation function
-def og_peer_universe(stock, industry):
-    p_universe = []
-    tickers = Ticker(stock).recommendations[stock]['recommendedSymbols']
-    
-    for dic in tickers:
-        if not_correct_industry(dic['symbol'], industry):
-            continue
-        p_universe.append(dic['symbol'])
-    
-    return p_universe
-
-
 #Recommendations in the event YahooQuery's Recommendations function is not comprehensive enough
 def peer_universe_(stock, industry):
     lst = og_peer_universe(stock, industry)
@@ -213,13 +242,4 @@ def peer_universe_(stock, industry):
     else:
         return scrape_peer_universe(stock.upper())
 
-#Recommendations provided by YahooQuery is applicable in the CCA valuations
-def lucky_peer_universe(lst, industry):
-    if lst == []:
-        return []
-    elif og_peer_universe(lst[0], industry) == []:
-        print(type(lst))
-        return [lst[0], ] + peer_universe_(lst[1:], industry)
-    else:
-        tickers = og_peer_universe(lst[0], industry)
-        return tickers + lucky_peer_universe(lst[1:], industry)
+
