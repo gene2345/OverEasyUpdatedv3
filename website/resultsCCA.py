@@ -65,9 +65,13 @@ def results(tickerS):
         #Completion of dataframes
         print("Results preview")
         industry_values = df.iloc[-1]
-        
         ticker_values = df.iloc[-2]
-        return df, industry_values['EBITDA MARGIN (%)'] < ticker_values['EBITDA MARGIN (%)'], industry_values['EV/REVENUE (x)'] > ticker_values['EV/REVENUE (x)'], ticker_values['ENTERPRISE VALUE ($)'] < industry_values['EV/EBITDA (x)'] * ticker_values['EBITDA ($M)'] * 1000000
+
+        headers = df.iloc[:, :1]
+        df1 = df.iloc[:, :10]
+        df2 = df.iloc[:, [0,10,11,12,13,14,15]]
+        df3 = pd.concat([headers.reset_index(drop=True), df2.reset_index(drop=True)], ignore_index = True)
+        return df1, df2, industry_values['EBITDA MARGIN (%)'] < ticker_values['EBITDA MARGIN (%)'], industry_values['EV/REVENUE (x)'] > ticker_values['EV/REVENUE (x)'], ticker_values['ENTERPRISE VALUE ($)'] < industry_values['EV/EBITDA (x)'] * ticker_values['EBITDA ($M)'] * 1000000
         
     else:
         return "Incorrect Stock Ticker"

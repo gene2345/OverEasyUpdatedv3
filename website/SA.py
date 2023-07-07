@@ -16,7 +16,7 @@ from huggingface_hub import login
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.chrome.options import Options
 
 MODEL = AutoModelForSequenceClassification.from_pretrained("KernAI/stock-news-destilbert")
 tokenizer = AutoTokenizer.from_pretrained("KernAI/stock-news-destilbert")
@@ -140,7 +140,7 @@ def finviz_scraper(ticker):
 def yahoo_scraper(ticker):
     url = f'https://finance.yahoo.com/quote/{ticker}/community'
     response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0'})
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, 'html.parser')
     data = json.loads(soup.select_one('#spotim-config').get_text(strip=True))['config']
 
     url = "https://api-2-0.spot.im/v1.0.0/conversation/read"
@@ -163,7 +163,10 @@ def yahoo_scraper(ticker):
 
 def get_fear_and_greed():
 
-    driver = webdriver.Chrome()
+    options = Options()
+    options.add_argument("--headless=new")
+
+    driver = webdriver.Chrome(options = options)
     driver.get('https://en.macromicro.me/charts/50108/cnn-fear-and-greed')
 
     # search = driver.find_element_by_name("s")

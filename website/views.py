@@ -7,6 +7,7 @@ from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
 import yfinance as yf
 from .resultsCCA import *
+from pretty_html_table import build_table
 
 views = Blueprint("views", __name__)
 
@@ -46,9 +47,10 @@ def cca():
     if request.method == 'POST':
         #try:
         task_content = request.form['TickerSymbol']
-        df_required, bool1, bool2, bool3 = results(task_content)
-        return render_template("CCAresults.html", table = df_required.to_html(), text = task_content, 
-                                   bool1 = bool1, bool2 = bool2, bool3 = bool3, user = current_user)
+        df1, df2, bool1, bool2, bool3 = results(task_content)
+        ticker = task_content.upper()
+        return render_template("CCAresults.html", table1 = build_table(df1, 'blue_light'), table2 = build_table(df2, 'blue_light'),
+                                 text = task_content, bool1 = bool1, bool2 = bool2, bool3 = bool3, user = current_user, ticker = ticker)
         #except:
             #flash("Please key in a valid stock ticker", category = "error")
             #return render_template("CCA.html", user = current_user)        

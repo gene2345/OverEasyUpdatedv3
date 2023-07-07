@@ -192,6 +192,7 @@ import certifi
 import json
 import urllib.request
 import ssl
+import requests
 
 
 def get_jsonparsed_data(url):
@@ -206,9 +207,8 @@ def get_jsonparsed_data(url):
     -------
     dict
     """
-    
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-    response = urllib.request.urlopen(url, context=ssl_context)
+    response = urllib.request.urlopen(url)
     data = response.read().decode("utf-8")
     return json.loads(data)
 
