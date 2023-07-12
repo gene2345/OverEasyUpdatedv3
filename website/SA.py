@@ -168,7 +168,7 @@ def get_fear_and_greed():
 
     driver = webdriver.Chrome(options = options)
     driver.get('https://en.macromicro.me/charts/50108/cnn-fear-and-greed')
-
+    
     # search = driver.find_element_by_name("s")
     # search.send_keys("test")
     # search.send_keys(Keys.RETURN)

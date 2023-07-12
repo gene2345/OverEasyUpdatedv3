@@ -145,8 +145,9 @@ def SA():
     if request.method == 'POST':
         try:
             ticker = request.form.get('ticker').upper()
-            raw_data = yahoo_scraper(ticker)
-            yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
+            #raw_data = yahoo_scraper(ticker)
+            #yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
+            yahoo_sentiments = {"Positive":[0.50], "Neutral":[0.24], "Negative":[0.33]}
             yahoo_values = [yahoo_sentiments["Positive"][0], yahoo_sentiments["Neutral"][0], yahoo_sentiments["Negative"][0]]
             raw_data_2 = finviz_scraper(ticker)
             finviz_sentiments = sentiment_calculator(raw_data_2)
@@ -161,8 +162,8 @@ def SA():
                                labels = labels, finviz_values = finviz_values, yahoo_trend = yahoo_trend,
                                yahoo_sentiment = yahoo_sentiment, finviz_trend = finviz_trend, finviz_sentiment = finviz_sentiment
                                , overall_sentiment = overall_sentiment)
-        except:
-            flash('Stock does not exist', category = "error")
+        except Exception as e:
+            flash(str(e), category = "error")
             return render_template("SA.html", user = current_user)
     else:
         return render_template("SA.html", user = current_user)
