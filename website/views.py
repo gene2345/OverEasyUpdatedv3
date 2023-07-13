@@ -41,9 +41,9 @@ def delete(id):
         flash("Deleted", category = "success")
     return redirect('/')
 
-@login_required
-@views.route('/CCA', methods = ['GET', 'POST'])
-def cca():
+#@login_required
+#@views.route('/CCA', methods = ['GET', 'POST'])
+#def cca():
     if request.method == 'POST':
         #try:
         task_content = request.form['TickerSymbol']
