@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from .models import Note, Portfolio, PortfolioHistory
 from . import db
-from .calc import numericChecker
+from .calc import numericChecker, get_stock_price
 from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper, sentiment_calculator_yahoo, get_market_condition, get_market_trend, prelim_model_calc
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
 import yfinance as yf
@@ -18,7 +18,8 @@ def home():
         note1 = request.form.get('note')
         note1 = note1.upper()
         try:
-            price = yf.Ticker(note1).info['regularMarketPreviousClose']
+        #   price = yf.Ticker(note1).info['regularMarketPreviousClose']
+            price = get_stock_price(items.data)
             new_note = Note(data=note1, user_id = current_user.id, price = price)
             db.session.add(new_note)
             db.session.commit()
@@ -26,7 +27,8 @@ def home():
         except:
             flash('Stock does not exist', category = "error")
     for items in Note.query:
-        items.price = yf.Ticker(items.data).info['regularMarketPreviousClose']
+        # items.price = yf.Ticker(items.data).info['regularMarketPreviousClose']
+        items.price = get_stock_price(items.data)
         db.session.commit()
     return render_template("home.html", user = current_user)
 
@@ -72,7 +74,8 @@ def yrport():
             flash("Please re enter quantity", category="error")
             return render_template("yrport.html", user = current_user)
         try:
-            price = yf.Ticker(stock1).info['regularMarketPreviousClose']
+        #   price = yf.Ticker(stock1).info['regularMarketPreviousClose']
+            price = get_stock_price(stock1)
             item = Portfolio.query.filter_by(data = stock1).first()
             if item is not None: #Add to history page
                 old_bought_price = float(item.bought_price)
@@ -102,11 +105,17 @@ def yrport():
         except:
             flash('Stock does not exist', category = "error")
     for items in Portfolio.query:
-        new_price = yf.Ticker(items.data).info['regularMarketPreviousClose']
-        items.current_price = new_price
-        items.profitloss = round((float(new_price) - float(items.bought_price)) * float(items.bought_qty),2)
-        items.bought_price = round(items.bought_price,2)
-        db.session.commit()        
+    #   new_price = yf.Ticker(items.data).info['regularMarketPreviousClose']
+        try:
+            print(type(items.data))
+            print(items.data)
+            new_price = get_stock_price(str(items.data))
+            items.current_price = new_price
+            items.profitloss = round((float(new_price) - float(items.bought_price)) * float(items.bought_qty),2)
+            items.bought_price = round(items.bought_price,2)
+            db.session.commit()
+        except Exception as e:
+            flash(e, category = "error")        
     return render_template("yrport.html", user = current_user)
 
 @login_required
@@ -145,9 +154,9 @@ def SA():
     if request.method == 'POST':
         try:
             ticker = request.form.get('ticker').upper()
-            #raw_data = yahoo_scraper(ticker)
-            #yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
-            yahoo_sentiments = {"Positive":[0.50], "Neutral":[0.24], "Negative":[0.33]}
+            raw_data = yahoo_scraper(ticker)
+            yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
+            #yahoo_sentiments = {"Positive":[0.50], "Neutral":[0.24], "Negative":[0.33]}
             yahoo_values = [yahoo_sentiments["Positive"][0], yahoo_sentiments["Neutral"][0], yahoo_sentiments["Negative"][0]]
             raw_data_2 = finviz_scraper(ticker)
             finviz_sentiments = sentiment_calculator(raw_data_2)
