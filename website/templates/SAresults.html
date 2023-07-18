@@ -33,6 +33,7 @@
   <p1 class ="analysis_para">From our latest analysis on Finviz articles, there is an overall {{finviz_sentiment}} 
     sentiment towards the {{ticker}} stock, which indicates a {{finviz_trend}} trend for this $ticker </p1>
 </div>
+
 </br>
 </br>
 <div>
@@ -45,6 +46,21 @@
 </br>
 <p1 class = "analysis_para">From our latest analysis on Yahoo posts and comments, there is an overall {{yahoo_sentiment}} 
   sentiment towards the {{ticker}} stock, which indicates a {{yahoo_trend}} trend for this $ticker </p1>
+
+</br>
+</br>
+<div>
+  <h3 style = "text-decoration: underline;">Further in depth analysis - MarketAux</h3>
+</div>
+</br>
+<div>
+  <canvas id="myChart3" width = "375" height = "200"></canvas>
+</div>
+</br>
+<p1 class = "analysis_para">From our latest analysis on MarketAux posts and comments, there is an overall {{aux_sentiment}} 
+  sentiment towards the {{ticker}} stock, which indicates a {{aux_trend}} trend for this $ticker </p1>
+
+
 
 {% block javascript %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -83,6 +99,30 @@
       datasets: [{
         label: 'YAHOO Sentiment for Ticker',
         data: {{yahoo_values}},
+        borderWidth: 1,
+        backgroundColor: ['green', 'blue', 'red']
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+  </script>
+
+<script>
+  const ct2 = document.getElementById('myChart3');
+
+  new Chart(ct2, {
+    type: 'bar',
+    data: {
+      labels: ['Positive', 'Neutral', 'Negative'],
+      datasets: [{
+        label: 'MarketAux Sentiment for Ticker',
+        data: {{aux_values}},
         borderWidth: 1,
         backgroundColor: ['green', 'blue', 'red']
       }]

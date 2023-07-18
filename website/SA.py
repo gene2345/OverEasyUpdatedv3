@@ -31,21 +31,9 @@ def roberta_polarity(text):
            "neutral":scores[1],
            "positive":scores[2]}
 
-def get_pos(text):
+def get_scores(text):
     try:
-        return roberta_polarity(text)["positive"]
-    except RuntimeError:
-        return 0.0
-
-def get_neut(text):
-    try:
-        return roberta_polarity(text)["neutral"]
-    except RuntimeError:
-        return 0.0
-
-def get_neg(text):
-    try:
-        return roberta_polarity(text)["negative"]
+        return roberta_polarity(text)
     except RuntimeError:
         return 0.0
     
@@ -55,9 +43,10 @@ def sentiment_calculator(lister): #input a list of texts and returns dictionary
     neutral = 0.0
 
     for text in lister:
-        positive += get_pos(text)
-        negative += get_neg(text)
-        neutral += get_neut(text)
+        scores = get_scores(text)
+        positive += scores["positive"]
+        negative += scores["negative"]
+        neutral += scores["neutral"]
       
     positive = positive / len(lister)
     negative = negative / len(lister)
@@ -82,9 +71,10 @@ def sentiment_calculator_yahoo(lister):
             continue
         try:
             text = lister["conversation"]['comments'][i]['content'][0]['text']
-            positive += get_pos(text)
-            negative += get_neg(text)
-            neutral += get_neut(text)
+            scores = get_scores(text)
+            positive += scores["positive"]
+            negative += scores["negative"]
+            neutral += scores["neutral"]
         except KeyError:
             continue
       
@@ -135,6 +125,21 @@ def finviz_scraper(ticker):
         texts.append(rows[-1])
     
     return texts
+
+def marketaux_scraper(ticker): 
+    api_key = "zFqAcB0Hh17YwvQ4FcnkOq5egzEVnGJuWBvW1Rey"
+    url = f"https://api.marketaux.com/v1/news/all?symbols={ticker}&filter_entities=true&language=en&api_token={api_key}"
+    response = requests.get(url).json()
+    
+    text_list = []
+    
+    for inputs in response['data']:
+        text_list.append(inputs['title'])
+        text_list.append(inputs['description'])
+        text_list.append(inputs['snippet'])
+        text_list.append(inputs['entities'][0]['highlights'][0]['highlight'])  
+    
+    return text_list
 
 
 def yahoo_scraper(ticker):

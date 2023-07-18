@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from .models import Note, Portfolio, PortfolioHistory
 from . import db
 from .calc import numericChecker, get_stock_price
-from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper, sentiment_calculator_yahoo, get_market_condition, get_market_trend, prelim_model_calc
+from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper, sentiment_calculator_yahoo, get_market_condition, get_market_trend, prelim_model_calc, marketaux_scraper
 from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
 import yfinance as yf
 from .resultsCCA import *
@@ -19,7 +19,7 @@ def home():
         note1 = note1.upper()
         try:
         #   price = yf.Ticker(note1).info['regularMarketPreviousClose']
-            price = get_stock_price(items.data)
+            price = get_stock_price(note1)
             new_note = Note(data=note1, user_id = current_user.id, price = price)
             db.session.add(new_note)
             db.session.commit()
@@ -153,24 +153,30 @@ def moreInfo(id):
 def SA():
     if request.method == 'POST':
         try:
+            #yahoo_sentiments = {"Positive":[0.50], "Neutral":[0.24], "Negative":[0.33]}
             ticker = request.form.get('ticker').upper()
             raw_data = yahoo_scraper(ticker)
             yahoo_sentiments = sentiment_calculator_yahoo(raw_data)
-            #yahoo_sentiments = {"Positive":[0.50], "Neutral":[0.24], "Negative":[0.33]}
             yahoo_values = [yahoo_sentiments["Positive"][0], yahoo_sentiments["Neutral"][0], yahoo_sentiments["Negative"][0]]
             raw_data_2 = finviz_scraper(ticker)
             finviz_sentiments = sentiment_calculator(raw_data_2)
             finviz_values = [finviz_sentiments["Positive"][0], finviz_sentiments["Neutral"][0], finviz_sentiments["Negative"][0]]
-            labels = ["Positive", "Neutral", "Negative"]
+            raw_data_3 = marketaux_scraper(ticker)
+            aux_sentiments = sentiment_calculator(raw_data_3)
+            aux_values = [aux_sentiments["Positive"][0], aux_sentiments["Neutral"][0], aux_sentiments["Negative"][0]]
+            aux_trend = get_market_trend(aux_values)
+            aux_sentiment = get_market_condition(aux_values)
             yahoo_trend = get_market_trend(yahoo_values)
             yahoo_sentiment = get_market_condition(yahoo_values)
             finviz_trend = get_market_trend(finviz_values)
             finviz_sentiment = get_market_condition(finviz_values)
-            overall_sentiment = prelim_model_calc([finviz_values, yahoo_values])
+            overall_sentiment = prelim_model_calc([finviz_values, yahoo_values, aux_values])
+            labels = ["Positive", "Neutral", "Negative"]
             return render_template("SAresults.html", user = current_user, ticker = ticker, yahoo_values = yahoo_values, 
                                labels = labels, finviz_values = finviz_values, yahoo_trend = yahoo_trend,
                                yahoo_sentiment = yahoo_sentiment, finviz_trend = finviz_trend, finviz_sentiment = finviz_sentiment
-                               , overall_sentiment = overall_sentiment)
+                               , aux_values = aux_values, aux_sentiment = aux_sentiment, aux_trend = aux_trend, 
+                               overall_sentiment = overall_sentiment)
         except Exception as e:
             flash(str(e), category = "error")
             return render_template("SA.html", user = current_user)
