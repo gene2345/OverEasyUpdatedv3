@@ -31,9 +31,21 @@ def roberta_polarity(text):
            "neutral":scores[1],
            "positive":scores[2]}
 
-def get_scores(text):
+def get_pos(text):
     try:
-        return roberta_polarity(text)
+        return roberta_polarity(text)["positive"]
+    except RuntimeError:
+        return 0.0
+
+def get_neut(text):
+    try:
+        return roberta_polarity(text)["neutral"]
+    except RuntimeError:
+        return 0.0
+
+def get_neg(text):
+    try:
+        return roberta_polarity(text)["negative"]
     except RuntimeError:
         return 0.0
     
@@ -43,10 +55,9 @@ def sentiment_calculator(lister): #input a list of texts and returns dictionary
     neutral = 0.0
 
     for text in lister:
-        scores = get_scores(text)
-        positive += scores["positive"]
-        negative += scores["negative"]
-        neutral += scores["neutral"]
+        positive += get_pos(text)
+        negative += get_neg(text)
+        neutral += get_neut(text)
       
     positive = positive / len(lister)
     negative = negative / len(lister)
@@ -71,10 +82,9 @@ def sentiment_calculator_yahoo(lister):
             continue
         try:
             text = lister["conversation"]['comments'][i]['content'][0]['text']
-            scores = get_scores(text)
-            positive += scores["positive"]
-            negative += scores["negative"]
-            neutral += scores["neutral"]
+            positive += get_pos(text)
+            negative += get_neg(text)
+            neutral += get_neut(text)
         except KeyError:
             continue
       
@@ -89,6 +99,7 @@ def sentiment_calculator_yahoo(lister):
     }
 
     return d
+
 
 
 def finviz_scraper(ticker):
@@ -204,7 +215,7 @@ def prelim_model_calc(list_of_sentiments):
     neg_count = 0
     for listers in list_of_sentiments:
         pos_count += listers[0]
-        neg_count += listers[1]
+        neg_count += listers[2]
     if pos_count > neg_count:
         return "Bullish"
     elif neg_count > pos_count:

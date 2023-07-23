@@ -4,7 +4,7 @@ from .models import Note, Portfolio, PortfolioHistory
 from . import db
 from .calc import numericChecker, get_stock_price
 from .SA import sentiment_calculator, get_fear_and_greed, finviz_scraper, yahoo_scraper, sentiment_calculator_yahoo, get_market_condition, get_market_trend, prelim_model_calc, marketaux_scraper
-from .cca import get_price_marketCap, get_outstandingShares_enterpriseValue_peg, get_totalDebt_totalCash_EBITDA, get_dilutedEps_revenue, get_quarterlyRevenueGrowth, express_in_MM, get_all_data
+from .cca import get_all_data
 import yfinance as yf
 from .resultsCCA import *
 from pretty_html_table import build_table
@@ -77,7 +77,7 @@ def yrport():
         #   price = yf.Ticker(stock1).info['regularMarketPreviousClose']
             price = get_stock_price(stock1)
             item = Portfolio.query.filter_by(data = stock1).first()
-            if item is not None: #Add to history page
+            if item is not None and item.user_id == current_user.id: #Add to history page
                 old_bought_price = float(item.bought_price)
                 old_bought_qty = float(item.bought_qty)
                 print(old_bought_price)
@@ -177,11 +177,12 @@ def SA():
                                yahoo_sentiment = yahoo_sentiment, finviz_trend = finviz_trend, finviz_sentiment = finviz_sentiment
                                , aux_values = aux_values, aux_sentiment = aux_sentiment, aux_trend = aux_trend, 
                                overall_sentiment = overall_sentiment)
-        except Exception as e:
-            flash(str(e), category = "error")
+        except:
+            flash("Incorrect stock ticker or API is limited, please refresh", category = "error")
             return render_template("SA.html", user = current_user)
     else:
         return render_template("SA.html", user = current_user)
+
 
 @login_required #selling a position in your portfolio
 @views.route('/editPosition', methods = ['GET', 'POST'])
